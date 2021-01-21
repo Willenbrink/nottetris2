@@ -101,7 +101,7 @@ function love.load()
 	musicoptions:setVolume( 1 )
 	musicoptions:setLooping( true )
 	
-	boot = love.audio.newSource( "sounds/boot.ogg")
+	boot = love.audio.newSource( "sounds/boot.ogg", "stream")
 	blockfall = love.audio.newSource( "sounds/blockfall.ogg", "stream")
 	blockturn = love.audio.newSource( "sounds/turn.ogg", "stream")
 	blockmove = love.audio.newSource( "sounds/move.ogg", "stream")
@@ -465,7 +465,7 @@ function newPaddedImageFont(filename, glyphs)
         padded:paste(source, 0, 0)
 		local image = love.graphics.newImage(padded)
 		image:setFilter("nearest", "nearest")
-        return love.graphics.newImageFont(image, glyphs)
+        return love.graphics.newImageFont(padded, glyphs)
     end
 	
     return love.graphics.newImageFont(source, glyphs)
@@ -1105,7 +1105,7 @@ function love.keypressed( key, unicode )
 				love.audio.play(pausesound)
 			else
 				if musicno < 4 then
-					love.audio.resume(music[musicno])
+					love.audio.play(music[musicno])
 				end
 			end
 		end
