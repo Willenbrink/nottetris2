@@ -1161,49 +1161,65 @@ end
 function collideA(a, b, coll) --box2d callback. calls endblock.
 	--Sometimes a is nil or something I have no idea why.
 	if a == nil or b == nil or tetribodies[1] == nil then
-		return
+       print("Collision - Inputvalues are nil")
+	   return
 	end
-	
-	if a:getUserData() or b:getUserData() then
-		if a:getUserData() ~= "left" and a:getUserData() ~= "right" and b:getUserData() ~= "left" and b:getUserData() ~= "right" then 
-			if gamestate == "gameA" then
-				if tetribodies[1]:getY() < losingY then
-					gamestate = "failingA"
-					if musicno < 4 then
-						love.audio.stop(music[musicno])
-					end
-					love.audio.stop(gameover1)
-					love.audio.play(gameover1)
-				
-					if wallshapes[2] then
-						wallshapes[2]:destroy()
-						wallshapes[2] = nil
-					end
-				else
-					tetrikind[highestbody()+1] = tetrikind[1]
-					
-					tetriimagedata[highestbody()+1] = tetriimagedata[1]
-					tetriimages[highestbody()+1] = padImagedata( tetriimagedata[highestbody()+1] )
-					
-					tetribodies[highestbody()+1] = tetribodies[1]
-					tetribodies[highestbody()]:setLinearDamping(0.5)
-					
-					tetrishapes[highestbody()] = {}
-					tetrifixtures[highestbody()] = {}
-					for i, v in pairs(tetrishapes[1]) do
-						tetrishapes[highestbody()][i] = tetrishapes[1][i]
-						tetrifixtures[highestbody()][i] = tetrifixtures[1][i]
-						tetrifixtures[highestbody()][i]:setUserData({highestbody()})
-						tetrishapes[1][i] = nil
-					end
-					
-					tetribodies[1] = nil
-				
-					endblock = true
-				end
-			end
-		end
-	end
+
+	if not a:getUserData() and not b:getUserData() then
+       print("Collision - UserData")
+       return
+    end
+    if a:getUserData() == "left" or a:getUserData() == "right" or b:getUserData() == "left" or b:getUserData() == "right" then
+       print("Collision - left-right")
+       return
+    end
+    if gamestate ~= "gameA" then
+       return
+    end
+    if tetribodies[1] ~= b:getBody() and tetribodies[1] ~= a:getBody() then
+       print("Collision - Unrelated to falling block")
+       return
+    end
+    if tetribodies[1] == b:getBody() and tetribodies[1]:getY() < losingY then
+       print("Collision - Lost")
+        gamestate = "failingA"
+        if musicno < 4 then
+            love.audio.stop(music[musicno])
+        end
+        love.audio.stop(gameover1)
+        love.audio.play(gameover1)
+
+        if wallshapes ~= nil then
+            if wallshapes[2] then
+                wallshapes[2]:destroy()
+                wallshapes[2] = nil
+            end
+        else
+            print("Collision - Catched error on access of wallshapes")
+        end
+        return
+    end
+    print("Collision - Default")
+    tetrikind[highestbody()+1] = tetrikind[1]
+
+    tetriimagedata[highestbody()+1] = tetriimagedata[1]
+    tetriimages[highestbody()+1] = padImagedata( tetriimagedata[highestbody()+1] )
+
+    tetribodies[highestbody()+1] = tetribodies[1]
+    tetribodies[highestbody()]:setLinearDamping(0.5)
+
+    tetrishapes[highestbody()] = {}
+    tetrifixtures[highestbody()] = {}
+    for i, v in pairs(tetrishapes[1]) do
+        tetrishapes[highestbody()][i] = tetrishapes[1][i]
+        tetrifixtures[highestbody()][i] = tetrifixtures[1][i]
+        tetrifixtures[highestbody()][i]:setUserData({highestbody()})
+        tetrishapes[1][i] = nil
+    end
+
+    tetribodies[1] = nil
+
+    endblock = true
 end
 
 function endblockA() --handles failing, moving the current block to the end of the tables and calls checklinedensity in active mode
