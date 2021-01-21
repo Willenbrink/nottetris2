@@ -319,12 +319,12 @@ function gameA_update(dt)
 	if gamestate == "gameA" then
 		if controls.isDown("rotateright") then
 			if tetribodies[1]:getAngularVelocity() < 3 then
-				tetribodies[1]:applyTorque( 70 )
+				tetribodies[1]:applyTorque( 700 )
 			end
 		end
 		if controls.isDown("rotateleft") then
 			if tetribodies[1]:getAngularVelocity() > -3 then
-				tetribodies[1]:applyTorque( -70 )
+				tetribodies[1]:applyTorque( -700 )
 			end
 		end
 	
