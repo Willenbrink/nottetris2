@@ -570,18 +570,21 @@ function removeline(lineno) --Does all necessary things to clear a line. Refines
 						cutimage(i-ioffset, numberofgroups)
 						
 						--mass confusion
-						tetribodies[i-ioffset]:setMassFromShapes()
+                        -- TODO simply remove?
+						--tetribodies[i-ioffset]:setMassFromShapes()
 						
 						local mass = tetribodies[i-ioffset]:getMass()
 						if mass < minmass then
 							for i, v in pairs(tetrishapes[i-ioffset]) do
-								v:setDensity( minmass/mass )
+                                -- TODO
+								--v:setDensity( minmass/mass )
 							end
 							
-							tetribodies[i-ioffset]:setMassFromShapes()
+							--tetribodies[i-ioffset]:setMassFromShapes()
 							
 							for i, v in pairs(tetrishapes[i-ioffset]) do
-								v:setDensity( 1 )
+                                -- TODO
+								--v:setDensity( 1 )
 							end
 						end
 						
@@ -644,7 +647,7 @@ function removeline(lineno) --Does all necessary things to clear a line. Refines
 			--clean up the tables..
 			for a, b in pairs(tetrishapescopy) do
 				if tetrishapescopy[a] then
-					tetrishapescopy[a]:destroy()
+					tetrishapescopy[a]:release()
 					tetrishapescopy[a] = nil
 				end
 			end
@@ -734,7 +737,7 @@ function cutimage(bodyid, numberofgroups) --cuts the image of a body based on it
 			local deletepixel = true
 			
 			for i, v in pairs(tetrishapes[bodyid]) do
-				if v:testPoint( dummy1, dummy2 ) then
+				if v:testPoint(0, 0, 0, dummy1, dummy2 ) then
 					deletepixel = false
 					break
 				end
@@ -750,6 +753,7 @@ function cutimage(bodyid, numberofgroups) --cuts the image of a body based on it
 end
 
 function refineshape(line, mult, bodyid, body, shapeid, shape) --refines a shape using the old coordinates and the cutting line
+    print("Shape:" .. "\n" .. tostring(line) .. "\n" .. tostring(mult) .. "\n" .. tostring(bodyid) .. "\n" .. tostring(body) .. "\n" .. tostring(shapeid) .. "\n" .. tostring(shape))
 	local leftx, rightx = getintersectX(tetrishapes[bodyid][shapeid], line)
 	if leftx ~= -1 then --Not sure what to do if not
 		local coords = getPoints2table(tetrishapes[bodyid][shapeid])
@@ -799,6 +803,7 @@ function refineshape(line, mult, bodyid, body, shapeid, shape) --refines a shape
 				for i=1,#coords,2 do
 					newcoords[i],newcoords[i+1] = body:getLocalPoint(coords[i], coords[i+1])
 				end
+                print("Creating new shape")
 				return love.physics.newPolygonShape(body, unpack(newcoords))
 			end
 		else
@@ -1188,7 +1193,6 @@ function collideA(a, b, coll) --box2d callback. calls endblock.
        return
     end
     if tetribodies[1] ~= b:getBody() and tetribodies[1] ~= a:getBody() then
-       print("Collision - Unrelated to falling block")
        return
     end
     if tetribodies[1] == b:getBody() and tetribodies[1]:getY() < losingY then
