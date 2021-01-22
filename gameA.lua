@@ -405,7 +405,7 @@ function removeline(lineno) --Does all necessary things to clear a line. Refines
 	numberofbodies = highestbody()
 	local ioffset = 0
 	tetribodies[1] = "dummy :D"
-	for i = 2, numberofbodies do --every body
+	for i = 2, numberofbodies do --every body except the first
 		v = tetribodies[i-ioffset]
 		if i-ioffset > numberofbodies then
 			print("oh yeah")
@@ -460,6 +460,7 @@ function removeline(lineno) --Does all necessary things to clear a line. Refines
 						below = true
 					end
 				end
+                print("Refining now: " .. tostring(above) .. "-" .. tostring(inside) .. "-" .. tostring(below))
 				if above == true and inside == true and below == false then
 					tetrishapescopy[#tetrishapescopy+1]=refineshape(upperline, 1, i-ioffset, v, j, w)
 					refined = true
@@ -491,7 +492,7 @@ function removeline(lineno) --Does all necessary things to clear a line. Refines
 			--gotta set the bodyids here and reuse them in the "check for disconnect shapes" further down
 			for a, b in pairs(tetrishapes[i-ioffset]) do --remove all shapes
 				if tetrishapes[i-ioffset][a] then
-					tetrishapes[i-ioffset][a]:destroy()
+					tetrishapes[i-ioffset][a]:release()
 					tetrishapes[i-ioffset][a] = nil
 				end
 			end
@@ -540,9 +541,11 @@ function removeline(lineno) --Does all necessary things to clear a line. Refines
 				for a = 1, numberofgroups do
 					if a == 1 then --reassign the old bodyid
 						rotation = tetribodies[i-ioffset]:getAngle()
-						tetribodies[i-ioffset]:destroy()
+                        -- TODO What is supposed to happen here?
+						--tetribodies[i-ioffset]:destroy()
 						tetribodies[i-ioffset] = love.physics.newBody(world, tetribodies[i-ioffset]:getX(), tetribodies[i-ioffset]:getY(), "dynamic")
-						tetribodies[uniqueid].setInertia(blockrot)
+                        -- TODO and here?
+						--tetribodies[uniqueid].setInertia(blockrot)
 						--tetribodies[uniqueid].setMass(tetribodies[i-ioffset]:getMass())
 						tetribodies[i-ioffset]:setAngle(rotation)
 						tetrishapes[i-ioffset] = {}
@@ -552,8 +555,10 @@ function removeline(lineno) --Does all necessary things to clear a line. Refines
 								for var = 1, #cotable, 2 do
 									cotable[var], cotable[var+1] = tetribodies[i-ioffset]:getLocalPoint(cotable[var], cotable[var+1])
 								end
-								tetrishapes[i-ioffset][#tetrishapes[i-ioffset]+1] = love.physics.newPolygonShape(tetribodies[i-ioffset], unpack(cotable))
-								tetrishapes[i-ioffset][#tetrishapes[i-ioffset]]:setData({i-ioffset}) --set the shape name for collision
+                                shape = love.physics.newPolygonShape(unpack(cotable))
+                                fixture = love.physics.newFixture(tetribodies[i-ioffset], shape, density)
+								tetrishapes[i-ioffset][#tetrishapes[i-ioffset]+1] = shape
+								fixture:setUserData({i-ioffset}) --set the shape name for collision
 							end
 						end
 						
@@ -802,10 +807,16 @@ function refineshape(line, mult, bodyid, body, shapeid, shape) --refines a shape
 	else
 		local coords = getPoints2table(tetrishapes[bodyid][shapeid])
 		local newcoords={}
+        print(#coords)
 		for i=1,#coords,2 do
 			newcoords[i],newcoords[i+1] = body:getLocalPoint(coords[i], coords[i+1])
 		end
-		return love.physics.newPolygonShape(body, unpack(newcoords))
+        print("Creating new shapev2")
+        print(#newcoords)
+        print(unpack(newcoords))
+		shape = love.physics.newPolygonShape(unpack(newcoords))
+        love.physics.newFixture(body, shape, density)
+        return shape
 	end
 end
 
